@@ -5,23 +5,41 @@ using namespace std;
 
 namespace rk
 {
-
-	using uint = unsigned int;
-	using ushort = unsigned short;
-
 	template<class T>
 	class vector
 	{
+		T* buffer = nullptr;
+		int total_size = 0;
+
 	public:
-		vector(ushort size)
+		// inner class iterator - pattern
+		class iterator :
+			public std::iterator<std::input_iterator_tag, T, T, T*, T>
+		{
+			T* ptr_;
+		public:
+			explicit iterator(T* ptr) :ptr_(ptr) {}
+			iterator& operator++() { ptr_++; return (*this); }
+			//iterator operator++(int) { iterator retval = *this; ++(*this); return retval; }
+
+			reference operator*() { return *ptr_; }
+
+			bool operator==(iterator other) const { return ptr_ == other.ptr_; }
+			bool operator!=(iterator other) const { return ptr_ != other.ptr_; }
+		};
+
+		vector(int size)
 		{
 			if (buffer == nullptr)
 			{
 				cout << "buffer is empty" << endl;
 				buffer = new T[size];
+				std::fill(buffer, buffer + size, T());
 				total_size = size;
 			}
 		}
+
+
 		vector()
 		{
 		}
@@ -33,12 +51,13 @@ namespace rk
 			else
 				delete[] buffer;
 		}
+
 		void fill(const T value)
 		{
-			for (uint i = 0; i<total_size; ++i)
+			for (int i = 0; i<total_size; ++i)
 				buffer[i] = value;
 		}
-		void resize(const uint size)
+		void resize(const int size)
 		{
 			if (size > total_size)
 			{
@@ -51,25 +70,24 @@ namespace rk
 				total_size = size;
 			}
 		}
-		uint size() const
+		int size() const
 		{
 			return total_size;
 		}
-		T operator[](uint index)
+		T operator[](int index)
 		{
 			return buffer[index];
 		}
-		T* begin() const
+
+
+		iterator begin()
 		{
-			return buffer;
+			return iterator(buffer);
 		}
-		T* end() const
+		iterator end()
 		{
-			return &buffer[total_size - 1];
+			return iterator(buffer + total_size);
 		}
-	private:
-		uint total_size = 0;
-		T* buffer = nullptr;
 	};
 }
 
@@ -93,3 +111,4 @@ int main()
 	cout << vec << endl;
 	return 0;
 }
+
